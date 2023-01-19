@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { ReactComponent as ArrowRightIcon } from '../assets/svg/keyboardArrowRightIcon.svg';
 import visibilityIcon from '../assets/svg/visibilityIcon.svg';
 
@@ -16,8 +18,28 @@ function SignIn() {
   const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
-      [e.target.id]: e.target.value
-    }))
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      if (userCredential.user) {
+        navigate('/');
+      }
+    } catch (error) {
+      toast.error('Bad User Credentials');
+    }
   };
 
   return (
@@ -28,7 +50,7 @@ function SignIn() {
         </header>
 
         <main>
-          <form>
+          <form onSubmit={onSubmit}>
             <input
               type='email'
               value={email}
@@ -60,11 +82,9 @@ function SignIn() {
               Forgot Password
             </Link>
 
-            <div className="signInBar">
-              <p className="signInText">
-                Sign In
-              </p>
-              <button className="signInButton">
+            <div className='signInBar'>
+              <p className='signInText'>Sign In</p>
+              <button className='signInButton'>
                 <ArrowRightIcon fill='#ffffff' width='34px' height='34px' />
               </button>
             </div>

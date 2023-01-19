@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReactComponent as ArrowRightIcon } from '../assets/svg/keyboardArrowRightIcon.svg';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
+import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase.config';
 import visibilityIcon from '../assets/svg/visibilityIcon.svg';
 
 function SignUp() {
@@ -17,8 +25,38 @@ function SignUp() {
   const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
-      [e.target.id]: e.target.value
-    }))
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCredential.user;
+
+      updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+
+      const formDataCopy = {...formData}
+      delete formDataCopy.password;
+      formDataCopy.timestamp = serverTimestamp();
+
+      await setDoc(doc(db, 'users', user.uid), formDataCopy);
+
+      navigate('/');
+    } catch (error) {
+      toast.error('Something went wrongt with registration');
+    }
   };
 
   return (
@@ -29,8 +67,8 @@ function SignUp() {
         </header>
 
         <main>
-          <form>
-          <input
+          <form onSubmit={onSubmit}>
+            <input
               type='text'
               value={name}
               id='name'
@@ -69,11 +107,9 @@ function SignUp() {
               Forgot Password
             </Link>
 
-            <div className="signUpBar">
-              <p className="signUpText">
-                Sign Up
-              </p>
-              <button className="signUpButton">
+            <div className='signUpBar'>
+              <p className='signUpText'>Sign Up</p>
+              <button className='signUpButton'>
                 <ArrowRightIcon fill='#ffffff' width='34px' height='34px' />
               </button>
             </div>
