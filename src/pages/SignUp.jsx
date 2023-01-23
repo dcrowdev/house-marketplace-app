@@ -8,6 +8,7 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import OAuth from '../components/OAuth';
 import { db } from '../firebase.config';
 import visibilityIcon from '../assets/svg/visibilityIcon.svg';
 
@@ -115,7 +116,7 @@ function SignUp() {
             </div>
           </form>
 
-          {/* Google OAuth */}
+          <OAuth />
 
           <Link to='/sign-in' className='registerLink'>
             Sign In Instead
